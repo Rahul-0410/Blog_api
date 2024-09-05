@@ -5,10 +5,12 @@ const app=express();
 const bcrypt = require('bcrypt');
 const User= require('./model/user');
 const jwt=require('jsonwebtoken');
+const cookieParser=require('cookie-parser'); 
 
 // to pass cookie in react set credentials to include
 app.use(cors({credentials:true,origin:'http://localhost:3000'}));
 app.use(express.json());
+app.use(cookieParser());
 
 
 const salt=bcrypt.genSaltSync(10);
@@ -47,6 +49,20 @@ app.post('/login',async (req,res)=>{
     } else{
         res.status(400).json({message:'login failed'});
     }
+})
+
+app.get('/profile',(req,res)=>{
+     const {token}=req.cookies;
+        jwt.verify(token,secret,{},(err,decoded)=>{
+            if(err){
+                res.status(400).json({message:'not logged in'});
+            }
+            res.json(decoded);
+        })
+})
+
+app.post('/logout',(req,res)=>{
+    res.cookie('token','').json('ok');
 })
 
 app.listen(4000);
