@@ -44,7 +44,10 @@ app.post('/login',async (req,res)=>{
                 if(err){
                     res.status(400).json({message:'login failed'});
                 }
-                res.cookie('token',token).json('ok');
+                res.cookie('token',token).json({
+                    id:userDoc._id,
+                    username
+                });
         })
     } else{
         res.status(400).json({message:'login failed'});
