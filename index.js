@@ -6,6 +6,9 @@ const bcrypt = require('bcrypt');
 const User= require('./model/user');
 const jwt=require('jsonwebtoken');
 const cookieParser=require('cookie-parser'); 
+const multer = require('multer');
+
+const upload = multer({dest:'uploads/'});
 
 // to pass cookie in react set credentials to include
 app.use(cors({credentials:true,origin:'http://localhost:3000'}));
@@ -66,6 +69,11 @@ app.get('/profile',(req,res)=>{
 
 app.post('/logout',(req,res)=>{
     res.cookie('token','').json('ok');
+})
+
+app.post('/post',upload.single('file'),(req,res)=>{
+        // res.json({files: req.file});
+        res.json('ok');
 })
 
 app.listen(4000);
