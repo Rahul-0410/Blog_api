@@ -4,11 +4,14 @@ const { default: mongoose } = require('mongoose');
 const app=express();
 const bcrypt = require('bcrypt');
 const User= require('./model/user');
+const Post = require('./model/Post')
 const jwt=require('jsonwebtoken');
 const cookieParser=require('cookie-parser'); 
 const multer = require('multer');
 
 const upload = multer({dest:'uploads/'});
+
+const fs=require('fs');
 
 // to pass cookie in react set credentials to include
 app.use(cors({credentials:true,origin:'http://localhost:3000'}));
@@ -71,9 +74,28 @@ app.post('/logout',(req,res)=>{
     res.cookie('token','').json('ok');
 })
 
-app.post('/post',upload.single('file'),(req,res)=>{
-        // res.json({files: req.file});
-        res.json('ok');
+app.post('/post',upload.single('file'), async (req,res)=>{
+    const {originalname,path} = req.file;
+   const parts= originalname.split(".");
+   const ext= parts[parts.length-1];
+   const newPath= path+'.'+ext;
+   fs.renameSync(path,newPath);
+
+    const {title, summary, content} =req.body;
+ const PostDoc= await  Post.create({
+        title,
+        summary,
+        content,
+        cover: newPath
+    })
+    
+        res.json(PostDoc);
+        // res.json('ok');
+})
+
+app.get('/post',async (req,res)=>{
+  const posts= await Post.find();
+  res.json(posts);
 })
 
 app.listen(4000);
