@@ -16,7 +16,21 @@ const { info } = require("console");
 
 // to pass cookie in react set credentials to include
 // app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
-app.use(cors({ credentials: true, origin: true }));
+// app.use(cors({ credentials: true, origin: true }));
+app.use(
+  cors({
+    credentials: true,
+    origin: (origin, callback) => {
+      const allowedOrigins = ["http://localhost:3000", "https://your-deployed-frontend-url.com"];
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+  })
+);
+
 app.use(express.json());
 app.use(cookieParser());
 app.use("/uploads", express.static("uploads"));
@@ -63,15 +77,30 @@ app.post("/login", async (req, res) => {
   }
 });
 
+// app.get("/profile", (req, res) => {
+//   const { token } = req.cookies;
+//   jwt.verify(token, secret, {}, (err, decoded) => {
+//     if (err) {
+//       res.status(400).json({ message: "not logged in" });
+//     }
+//     res.json(decoded);
+//   });
+// });
 app.get("/profile", (req, res) => {
   const { token } = req.cookies;
+
+  if (!token) {
+    return res.status(401).json({ message: "Token not provided" });
+  }
+
   jwt.verify(token, secret, {}, (err, decoded) => {
     if (err) {
-      res.status(400).json({ message: "not logged in" });
+      return res.status(401).json({ message: "Invalid or expired token" });
     }
     res.json(decoded);
   });
 });
+
 
 app.post("/logout", (req, res) => {
   res.cookie("token", "").json("ok");
