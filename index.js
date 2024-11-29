@@ -21,7 +21,7 @@ app.use(
   cors({
     credentials: true,
     origin: (origin, callback) => {
-      const allowedOrigins = ["http://localhost:3000", "https://your-deployed-frontend-url.com"];
+      const allowedOrigins = ["http://localhost:3000", "https://blog-ui-mauve.vercel.app/"];
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
